@@ -10,12 +10,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    public boolean CountUser(){
-        try{
-            userRepository.count();
-            return true;
-        }catch (Exception e){
-            return false;
-        }
+    public long CountUser(){
+        return userRepository.count();
     }
 }

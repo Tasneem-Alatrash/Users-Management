@@ -19,13 +19,8 @@ public class UserController {
         this.service = service;
     }
 
-    @GetMapping("/Test")
-    public ResponseEntity<String> CountUser(){
-        boolean test = service.CountUser();
-        if (test == true){
-            return ResponseEntity.ok("Database is working ");
-        }else {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Database is down ");
-        }
+    @GetMapping("/healthz")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
     }
 }
