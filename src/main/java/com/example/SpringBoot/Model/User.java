@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "\"user\"")
 @Data
@@ -25,6 +28,10 @@ public class User {
     @Column(name = "password" , nullable = false , length = 255)
     @ToString.Exclude
     private String password;
+
+    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
+    private List<Address> addresses = new ArrayList<>();
+
 
     public User(){}
 
