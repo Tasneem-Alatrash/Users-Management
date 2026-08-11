@@ -1,68 +1,82 @@
 package com.example.SpringBoot.Service;
 
 import com.example.SpringBoot.DTOs.Request.CreateUserRequest;
+import com.example.SpringBoot.DTOs.Request.UserSearch;
 import com.example.SpringBoot.Model.User;
 import com.example.SpringBoot.Repository.UserRepository;
 import com.example.SpringBoot.exceptions.UserNotFoundException;
+import com.example.SpringBoot.mapper.UserMapper;
+import org.springframework.data.jpa.domain.Specification;
+import static com.example.SpringBoot.specification.UserSpecification.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.example.SpringBoot.DTOs.Response.userResponse;
+import com.example.SpringBoot.DTOs.Response.UserResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    public UserService(UserRepository userRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    private final UserMapper mapper;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper mapper) {
+
         this.userRepository = userRepository;
+
+        this.passwordEncoder = passwordEncoder;
+        this.mapper = mapper;
     }
-    public long CountUser(){
+
+    public long countUser(){
         return userRepository.count();
     }
-    public userResponse createUser(CreateUserRequest request){
-        User user = new User(
-                request.getFirstName(),
-                request.getLastName(),
-                request.getPhoneNumber(),
-                request.getPassword()
-        );
+
+    public UserResponse createUser(CreateUserRequest request){
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
-        return toResponse(user);
+
+        return mapper.toResponse(user);
     }
-    public List<userResponse> GetAllUsers(){
+
+    public List<UserResponse> getAllUsers(){
         return userRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
-    public userResponse GetUserById(Integer id){
+
+    public UserResponse getUserById(Integer id){
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User with id " + id + " not found"));
 
-        return toResponse(user);
+        return mapper.toResponse(user);
 
     }
-    public List<userResponse> findByFirstName(String firstName){
 
-        return userRepository.findByFirstName(firstName)
+    public List<UserResponse> searchUser(UserSearch request){
+        Specification<User> spec = Specification
+                .where(hasFirstName(request.getFirstName()))
+                .and(hasLastName(request.getLastName()))
+                .and(hasPhoneNumber(request.getPhoneNumber()));
+        return userRepository.findAll(spec)
                 .stream()
-                .map(this::toResponse)
+                .map(mapper::toResponse)
                 .toList();
     }
-    public userResponse findByPhoneNumber(String phoneNumber){
-        User user = userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new UserNotFoundException("No user found with phone number: " + phoneNumber));
 
-        return toResponse(user);
+    public User getUserEntityById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
     }
-    private userResponse toResponse(User user) {
-        userResponse response = new userResponse();
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
-        response.setPhoneNumber(user.getPhoneNumber());
-        return response;
-    }
+
 }
 

@@ -1,7 +1,9 @@
 package com.example.SpringBoot.Model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "\"user\"")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -31,15 +35,5 @@ public class User {
 
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
     private List<Address> addresses = new ArrayList<>();
-
-
-    public User(){}
-
-    public User(String firstName, String lastName, String phoneNumber, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-    }
 
 }

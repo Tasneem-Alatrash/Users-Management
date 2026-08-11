@@ -2,6 +2,7 @@ package com.example.SpringBoot.exceptions;
 
 import com.example.SpringBoot.Service.SlackNotifier;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,9 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.slf4j.Logger;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     private final SlackNotifier slackNotifier;
 
     public GlobalExceptionHandler(SlackNotifier slackNotifier) {
@@ -19,53 +24,46 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String,Object>> handleGeneral(Exception e , HttpServletRequest request ){
+    public ResponseEntity<Map<String, Object>> handleGeneral(Exception e, HttpServletRequest request) {
 
-        String stackTrace = getShortStackTrace(e);
+        logger.error("Exception occurred: {}", e.getMessage(), e);
+
         String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+        String origin = findOriginInOurCode(e);
+
         String slackMessage = String.format(
-                "*Exception Occurred*\n" +
+                ":rotating_light: *Exception Occurred*\n" +
                         "*Type:* %s\n" +
                         "*Message:* %s\n" +
                         "*Endpoint:* %s %s%s\n" +
-                        "*Time:* %s\n" +
-                        "*Stack Trace:*\n```%s```",
-                e.getClass().getName(),
-                e.getMessage(),
+                        "*Location:* %s\n" +
+                        "*Time:* %s",
+                e.getClass().getSimpleName(),
+                e.getMessage() != null ? e.getMessage() : "No message",
                 request.getMethod(),
                 request.getRequestURI(),
                 queryString,
-                LocalDateTime.now(),
-                stackTrace
+                origin.equals("Unknown") ? "Spring framework layer (not in our code)" : origin,
+                LocalDateTime.now()
         );
 
         slackNotifier.send(slackMessage);
 
-        Map<String ,Object> body = Map.of(
-                "Status" , 500 ,
-                "error" , "Internal server error",
-                "message" , e.getMessage()
+        Map<String, Object> body = Map.of(
+                "status", 500,
+                "error", "Internal server error",
+                "message", e.getMessage() != null ? e.getMessage() : "No message"
         );
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException e){
-        Map<String, Object> body = Map.of(
-                "status", 404,
-                "error", "Not Found",
-                "message", e.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-    private String getShortStackTrace(Exception e) {
-        StackTraceElement[] elements = e.getStackTrace();
-        StringBuilder sb = new StringBuilder();
-        int limit = Math.min(10, elements.length);
-        for (int i = 0; i < limit; i++) {
-            sb.append(elements[i].toString()).append("\n");
+    private String findOriginInOurCode(Exception e) {
+        for (StackTraceElement element : e.getStackTrace()) {
+            if (element.getClassName().startsWith("com.example.SpringBoot")) {
+                return element.getClassName() + "." + element.getMethodName()
+                        + " (line " + element.getLineNumber() + ")";
+            }
         }
-        return sb.toString();
+        return "Unknown";
     }
 }
