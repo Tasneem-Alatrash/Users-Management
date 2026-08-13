@@ -11,7 +11,7 @@ public class AddressMapper {
         response.setId(address.getId());
         response.setStreet(address.getStreet());
         response.setCity(address.getCity());
-        response.setUser_id(address.getUser().getId());
+        response.setUserId(address.getUser().getId());
         return response;
     }
 }

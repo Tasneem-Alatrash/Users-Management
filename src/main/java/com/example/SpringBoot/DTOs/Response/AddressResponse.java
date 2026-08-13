@@ -11,5 +11,5 @@ public class AddressResponse {
 
     private String city;
 
-    private Integer user_id;
+    private Integer userId;
 }

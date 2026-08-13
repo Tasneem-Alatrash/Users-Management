@@ -56,7 +56,7 @@ public class UserService {
     public UserResponse getUserById(Integer id){
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User with id " + id + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
 
         return mapper.toResponse(user);
 

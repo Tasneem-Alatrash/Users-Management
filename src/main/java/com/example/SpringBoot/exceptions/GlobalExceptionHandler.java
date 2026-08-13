@@ -23,30 +23,23 @@ public class GlobalExceptionHandler {
         this.slackNotifier = slackNotifier;
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException e) {
+        Map<String, Object> body = Map.of(
+                "status", 404,
+                "error", "Not Found",
+                "message", e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception e, HttpServletRequest request) {
 
         logger.error("Exception occurred: {}", e.getMessage(), e);
 
-        String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-        String origin = findOriginInOurCode(e);
-
-        String slackMessage = String.format(
-                ":rotating_light: *Exception Occurred*\n" +
-                        "*Type:* %s\n" +
-                        "*Message:* %s\n" +
-                        "*Endpoint:* %s %s%s\n" +
-                        "*Location:* %s\n" +
-                        "*Time:* %s",
-                e.getClass().getSimpleName(),
-                e.getMessage() != null ? e.getMessage() : "No message",
-                request.getMethod(),
-                request.getRequestURI(),
-                queryString,
-                origin.equals("Unknown") ? "Spring framework layer (not in our code)" : origin,
-                LocalDateTime.now()
-        );
-
+        String slackMessage = "*Exception Details:*\n```" + buildExceptionDetails(e) + "```";
         slackNotifier.send(slackMessage);
 
         Map<String, Object> body = Map.of(
@@ -57,13 +50,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
-    private String findOriginInOurCode(Exception e) {
+    private String buildExceptionDetails(Exception e) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("\n");
+
         for (StackTraceElement element : e.getStackTrace()) {
             if (element.getClassName().startsWith("com.example.SpringBoot")) {
-                return element.getClassName() + "." + element.getMethodName()
-                        + " (line " + element.getLineNumber() + ")";
+                sb.append("    at ").append(element.toString()).append("\n");
             }
         }
-        return "Unknown";
+
+        Throwable cause = e.getCause();
+        if (cause != null) {
+            sb.append("Caused by:\n");
+            sb.append(cause.getClass().getName()).append(": ").append(cause.getMessage()).append("\n");
+        }
+
+        return sb.toString();
     }
 }
