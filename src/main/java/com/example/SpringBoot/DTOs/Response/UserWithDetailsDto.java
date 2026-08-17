@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class UserWithAddressResponse {
+public class UserWithDetailsDto {
 
     private Integer id;
 
@@ -15,5 +15,5 @@ public class UserWithAddressResponse {
 
     private String phoneNumber;
 
-    private List<AddressResponse> addresses;
+    private List<AddressDto> addresses;
 }

@@ -3,7 +3,7 @@ package com.example.SpringBoot.Controller;
 import com.example.SpringBoot.DTOs.Request.CreateUserRequest;
 import com.example.SpringBoot.DTOs.Request.UserSearch;
 import com.example.SpringBoot.DTOs.Response.UserResponse;
-import com.example.SpringBoot.DTOs.Response.UserWithAddressResponse;
+import com.example.SpringBoot.DTOs.Response.UserWithDetailsDto;
 import com.example.SpringBoot.Model.User;
 import com.example.SpringBoot.Service.UserService;
 import com.example.SpringBoot.mapper.UserMapper;
@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/with-addresses-paginated")
-    public Page<UserWithAddressResponse> getUsersWithAddresses(Pageable pageable) {
+    public Page<UserWithDetailsDto> getUsersWithAddresses(Pageable pageable) {
         Page<User> users = service.getUsersWithAddressesPaginated(pageable);
         return users.map(mapper::toResponseWithAddresses);
     }

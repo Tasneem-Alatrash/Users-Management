@@ -1,13 +1,13 @@
 package com.example.SpringBoot.mapper;
 
-import com.example.SpringBoot.DTOs.Response.AddressResponse;
+import com.example.SpringBoot.DTOs.Response.AddressDto;
 import com.example.SpringBoot.Model.Address;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AddressMapper {
-    public AddressResponse toResponse(Address address){
-        AddressResponse response = new AddressResponse();
+    public AddressDto toResponse(Address address){
+        AddressDto response = new AddressDto();
         response.setId(address.getId());
         response.setStreet(address.getStreet());
         response.setCity(address.getCity());
