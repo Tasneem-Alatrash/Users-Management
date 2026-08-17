@@ -11,8 +11,10 @@ import static com.example.SpringBoot.specification.UserSpecification.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.SpringBoot.DTOs.Response.UserResponse;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import org.springframework.data.domain.PageImpl;
 
 @Service
 public class UserService {
@@ -62,15 +64,13 @@ public class UserService {
 
     }
 
-    public List<UserResponse> searchUser(UserSearch request){
+    public Page<User> searchUser(UserSearch request , Pageable pageable){
         Specification<User> spec = Specification
                 .where(hasFirstName(request.getFirstName()))
                 .and(hasLastName(request.getLastName()))
                 .and(hasPhoneNumber(request.getPhoneNumber()));
-        return userRepository.findAll(spec)
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
+
+        return userRepository.findAll(spec , pageable);
     }
 
     public User getUserEntityById(Integer id) {
@@ -78,5 +78,22 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
     }
 
+    public Page<User> getUserPaginated (Pageable pageable){
+        return userRepository.findAll(pageable);
+    }
+
+    public Page<User> getAllUsersJpqlPaginated(Pageable pageable){
+        return userRepository.getAllUsersJpqlPaginated(pageable);
+    }
+    public Page<User> getAllUsersNativePaginated(Pageable pageable){
+        return userRepository.getAllUsersNativePaginated(pageable);
+    }
+
+    public Page<User> getUsersWithAddressesPaginated(Pageable pageable) {
+        Page<Integer> idsPage = userRepository.findUserIdsPaginated(pageable);
+        List<User> users = userRepository.findUsersWithAddressesByIds(idsPage.getContent());
+
+        return new PageImpl<>(users, pageable, idsPage.getTotalElements());
+    }
 }
 

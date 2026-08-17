@@ -3,7 +3,7 @@ package com.example.SpringBoot.DTOs.Response;
 import lombok.Data;
 
 @Data
-public class AddressResponse {
+public class AddressDto {
 
     private Integer id;
 
