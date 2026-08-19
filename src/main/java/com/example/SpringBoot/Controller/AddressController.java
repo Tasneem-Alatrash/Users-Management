@@ -1,6 +1,7 @@
 package com.example.SpringBoot.Controller;
 
 import com.example.SpringBoot.DTOs.Request.CreateAddressRequest;
+import com.example.SpringBoot.DTOs.Request.UpdateAddressDTO;
 import com.example.SpringBoot.DTOs.Response.AddressResponse;
 import com.example.SpringBoot.Service.AddressService;
 import org.springframework.http.HttpStatus;
@@ -29,4 +30,10 @@ public class AddressController {
         return ResponseEntity.ok(service.getAddressByUser(userId));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateAddress(@PathVariable Integer id , @RequestBody UpdateAddressDTO request){
+
+        service.updateAddress(id , request.getStreet() , request.getCity() , request.getCountry());
+        return ResponseEntity.ok("Address updated successfully");
+    }
 }

@@ -1,13 +1,12 @@
 package com.example.SpringBoot.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.web.bind.annotation.Mapping;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "address")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +20,9 @@ public class Address {
 
     @Column(name = "city" , nullable = false)
     private String city;
+
+    @Column(name = "country")
+    private String country;
 
     @ManyToOne
     @JoinColumn(name = "user_id" , nullable = false)

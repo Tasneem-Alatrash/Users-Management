@@ -1,12 +1,15 @@
 package com.example.SpringBoot.Service;
 
 import com.example.SpringBoot.DTOs.Request.CreateAddressRequest;
+import com.example.SpringBoot.DTOs.Request.UpdateAddressDTO;
 import com.example.SpringBoot.DTOs.Response.AddressResponse;
 import com.example.SpringBoot.Model.Address;
 import com.example.SpringBoot.Model.User;
 import com.example.SpringBoot.Repository.AddressRepository;
 import com.example.SpringBoot.mapper.AddressMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
 
@@ -40,5 +43,24 @@ public class AddressService {
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    public void updateAddress(Integer id , String newStreet,
+                              String newCity, String newCountry){
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Address not found"));
+
+        address.setStreet(newStreet);
+        address.setCity(newCity);
+
+        addressRepository.save(address);
+
+        if(newCountry.isEmpty() ||newCountry.isBlank()){
+            throw  new IllegalArgumentException("Country cannot be empty");
+        }
+
+        address.setCountry(newCountry);
+        addressRepository.save(address);
     }
 }
