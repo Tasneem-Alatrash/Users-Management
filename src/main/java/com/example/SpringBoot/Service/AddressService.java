@@ -27,7 +27,7 @@ public class AddressService {
         this.userService = userService;
     }
 
-    public AddressResponse addAddress(CreateAddressRequest request){
+    public AddressDto addAddress(CreateAddressRequest request){
         User user = userService.getUserEntityById(request.getUserId());
         Address address = new Address();
         address.setStreet(request.getStreet());
@@ -38,7 +38,7 @@ public class AddressService {
         return mapper.toResponse(address);
     }
 
-    public List<AddressResponse> getAddressByUser(Integer userId){
+    public List<AddressDto> getAddressByUser(Integer userId){
         return addressRepository.findByUserId(userId)
                 .stream()
                 .map(mapper::toResponse)

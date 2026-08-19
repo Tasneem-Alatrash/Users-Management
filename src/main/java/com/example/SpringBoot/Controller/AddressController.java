@@ -20,13 +20,13 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressResponse> addAddress(@RequestBody CreateAddressRequest request){
-        AddressResponse response = service.addAddress(request);
+    public ResponseEntity<AddressDto> addAddress(@RequestBody CreateAddressRequest request){
+        AddressDto response = service.addAddress(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<AddressResponse>> getByUser(@PathVariable Integer userId){
+    public ResponseEntity<List<AddressDto>> getByUser(@PathVariable Integer userId){
         return ResponseEntity.ok(service.getAddressByUser(userId));
     }
 
